@@ -16,7 +16,7 @@ export function Hero({ onSearch }) {
   };
 
   return (
-    <div className="relative h-[80vh]">
+    <div className="relative h-[70vh]">
       <div className="absolute inset-0 bg-black/50 z-10" />
       <img
         src="https://images.unsplash.com/photo-1504674900247-0877df9cc836"

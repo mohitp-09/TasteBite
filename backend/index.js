@@ -10,7 +10,7 @@ const app = express();
 // Middleware for CORS (Recommended)
 app.use(
   cors({
-    origin: "http://localhost:5174", // Allow only this origin
+    origin: "http://localhost:5177", // Allow only this origin
     methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
     allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
   })

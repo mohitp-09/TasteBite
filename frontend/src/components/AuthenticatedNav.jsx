@@ -21,7 +21,7 @@ export function AuthenticatedNav({ onLogout }) {
         <ShoppingCart size={20} className="text-yellow-400 group-hover:scale-110 transition-transform duration-300" />
         <span className="text-gray-200 group-hover:text-yellow-400 transition-colors duration-300">Cart</span>
         <span className="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-          0
+          5
         </span>
       </Link>
       

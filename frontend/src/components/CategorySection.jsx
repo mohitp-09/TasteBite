@@ -8,11 +8,14 @@ export function CategorySection({ categoryName, items }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4">
         {items.map((item) => (
           <DishCard
+            key={item._id}
             id={item._id}
             foodName={item.name}
             foodDescription={item.description}
             foodPrice={item.basicPrice}
             foodImage={item.img}
+            foodOptions={item.options}
+            foodCategory={item.CategoryName}
           />
         ))}
       </div>

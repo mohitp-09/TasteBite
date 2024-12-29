@@ -1,7 +1,15 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate, Link } from "react-router-dom";
 
-export function DishCard({id, foodName, foodDescription, foodPrice, foodImage }) {
+export function DishCard({
+  id,
+  foodOptions,
+  foodName,
+  foodDescription,
+  foodPrice,
+  foodImage,
+  foodCategory
+}) {
   const navigate = useNavigate();
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
@@ -17,13 +25,25 @@ export function DishCard({id, foodName, foodDescription, foodPrice, foodImage })
         <h3 className="text-xl font-bold text-white mb-2">{foodName}</h3>
         <p className="text-gray-400 mb-4">{foodDescription}</p>
         <div className="flex justify-between items-center">
-          <span className="text-yellow-400 text-xl font-bold">₹{foodPrice}</span>
-          <button className="bg-yellow-400 px-4 py-2 rounded hover:bg-yellow-500 transition-colors duration-300"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/food/${id}`);
-          }}>
-            
+          <span className="text-yellow-400 text-xl font-bold">
+            ₹{foodPrice}
+          </span>
+          <button
+            className="bg-yellow-400 px-4 py-2 rounded hover:bg-yellow-500 transition-colors duration-300"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/food`, {
+                state: {
+                  foodOptions,
+                  foodName,
+                  foodDescription,
+                  foodPrice,
+                  foodImage,
+                  foodCategory
+                },
+              });
+            }}
+          >
             Order Now
           </button>
         </div>

@@ -5,6 +5,7 @@ import { Navbar } from './components/Navbar';
 // import { FeaturedDishes } from './components/FeaturedDishes';
 import { Footer } from './components/Footer';
 import { Home } from './pages/Home';
+import { DishDetail } from './components/DishDetail';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/food" element={<DishDetail />} />
         </Routes>
         <Footer />
       </div>
