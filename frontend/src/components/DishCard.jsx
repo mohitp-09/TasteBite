@@ -34,6 +34,7 @@ export function DishCard({
               e.stopPropagation();
               navigate(`/food`, {
                 state: {
+                  id,
                   foodOptions,
                   foodName,
                   foodDescription,

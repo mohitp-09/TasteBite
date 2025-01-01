@@ -1,14 +1,37 @@
 import React, { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft,Check } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Badge } from "./ui/Badge";
 import { DishMetrics } from "./ui/DishMatrics";
+import { useDispatchCart, useCart } from "./ContextReducer";
 
 export function DishDetail() {
+
+  let dispatch = useDispatchCart();
+
+  let data = useCart()
+
+  const handleAddToCart = async ()=>{
+    await dispatch({
+      type: "ADD",
+      id: id,
+      name: foodName,
+      price: currentPrice,
+      qty: quantity,
+      size: selectedSize,
+    });    
+    // await console.log(data);
+    // console.log(dispatch);
+  }
+  console.log(data);
+
+
   const location = useLocation();
-  const { foodOptions, foodName, foodDescription, foodCategory, foodImage } =
+  const {id, foodOptions, foodName, foodDescription, foodCategory, foodImage } =
     location.state || {};
+
+  // console.log(location.state);   
 
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState(
@@ -31,9 +54,6 @@ export function DishDetail() {
     return sizeLabels[size] || "";
   };
 
-  const handleAddToCart = ()=>{
-    
-  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white py-8 px-6 md:px-12">
