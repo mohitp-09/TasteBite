@@ -7,31 +7,37 @@ import { DishMetrics } from "./ui/DishMatrics";
 import { useDispatchCart, useCart } from "./ContextReducer";
 
 export function DishDetail() {
-
   let dispatch = useDispatchCart();
 
-  let data = useCart()
+  let data = useCart();
 
-  const handleAddToCart = async ()=>{
-    await dispatch({
-      type: "ADD",
-      id: id,
-      name: foodName,
-      price: currentPrice,
-      qty: quantity,
-      size: selectedSize,
-    });    
-    // await console.log(data);
-    // console.log(dispatch);
-  }
-  console.log(data);
-
+  const handleAddToCart = async () => {
+    try {
+      await dispatch({
+        type: "ADD",
+        id: id,
+        name: foodName,
+        price: Number(foodOptions[0][selectedSize]), // Use price from the selected size
+        qty: quantity,
+        size: selectedSize,
+      });
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
+  };
+  
 
   const location = useLocation();
-  const {id, foodOptions, foodName, foodDescription, foodCategory, foodImage } =
-    location.state || {};
+  const {
+    id,
+    foodOptions,
+    foodName,
+    foodDescription,
+    foodCategory,
+    foodImage,
+  } = location.state || {};
 
-  // console.log(location.state);   
+  // console.log(location.state);
 
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState(
@@ -53,7 +59,6 @@ export function DishDetail() {
     };
     return sizeLabels[size] || "";
   };
-
 
   return (
     <div className="min-h-screen bg-gray-900 text-white py-8 px-6 md:px-12">
@@ -143,7 +148,10 @@ export function DishDetail() {
                 ₹{currentPrice}
               </p>
             </div>
-            <button className="px-8 py-3 bg-yellow-400 text-gray-900 rounded-full font-semibold hover:bg-yellow-500 transition-all" onClick={handleAddToCart}>
+            <button
+              className="px-8 py-3 bg-yellow-400 text-gray-900 rounded-full font-semibold hover:bg-yellow-500 transition-all"
+              onClick={handleAddToCart}
+            >
               Add to Cart
             </button>
           </div>

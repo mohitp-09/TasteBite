@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ShoppingCart, ClipboardList, LogOut, Menu, X } from 'lucide-react';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { ShoppingCart, ClipboardList, LogOut, Menu, X } from "lucide-react";
+import { useCart } from "./ContextReducer";
 
 export function AuthenticatedNav({ onLogout }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  let data = useCart();
 
   return (
     <div className="relative">
@@ -24,7 +27,7 @@ export function AuthenticatedNav({ onLogout }) {
       {/* Navigation Menu */}
       <div
         className={`absolute sm:relative sm:flex flex-col sm:flex-row sm:items-center sm:space-x-6 bg-gray-900 sm:bg-transparent text-white sm:space-y-0 space-y-4 sm:static z-50 w-full sm:w-auto sm:translate-y-0 transition-all duration-300 ${
-          isMenuOpen ? 'translate-y-12' : 'translate-y-[-300%] sm:translate-y-0'
+          isMenuOpen ? "translate-y-12" : "translate-y-[-300%] sm:translate-y-0"
         }`}
       >
         {/* Orders Link */}
@@ -33,8 +36,13 @@ export function AuthenticatedNav({ onLogout }) {
           className="group flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-800 transition-all duration-300"
           onClick={() => setIsMenuOpen(false)} // Close menu on link click
         >
-          <ClipboardList size={20} className="text-yellow-400 group-hover:scale-110 transition-transform duration-300" />
-          <span className="text-gray-200 group-hover:text-yellow-400 transition-colors duration-300">Orders</span>
+          <ClipboardList
+            size={20}
+            className="text-yellow-400 group-hover:scale-110 transition-transform duration-300"
+          />
+          <span className="text-gray-200 group-hover:text-yellow-400 transition-colors duration-300">
+            Orders
+          </span>
         </Link>
 
         {/* Cart Link */}
@@ -43,11 +51,22 @@ export function AuthenticatedNav({ onLogout }) {
           className="group relative flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-800 transition-all duration-300"
           onClick={() => setIsMenuOpen(false)} // Close menu on link click
         >
-          <ShoppingCart size={20} className="text-yellow-400 group-hover:scale-110 transition-transform duration-300" />
-          <span className="text-gray-200 group-hover:text-yellow-400 transition-colors duration-300">Cart</span>
-          <span className="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-            5
+          <ShoppingCart
+            size={20}
+            className="text-yellow-400 group-hover:scale-110 transition-transform duration-300"
+          />
+          <span className="text-gray-200 group-hover:text-yellow-400 transition-colors duration-300">
+            Cart
           </span>
+
+          {/* badge */}
+
+          {data.length > 0 && (
+            <span className="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              {data.length}
+            </span>
+          )}
+          
         </Link>
 
         {/* Divider */}
@@ -58,8 +77,13 @@ export function AuthenticatedNav({ onLogout }) {
           onClick={onLogout}
           className="group flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-red-900/30 transition-all duration-300"
         >
-          <LogOut size={20} className="text-red-400 group-hover:scale-110 transition-transform duration-300" />
-          <span className="text-gray-200 group-hover:text-red-400 transition-colors duration-300">Logout</span>
+          <LogOut
+            size={20}
+            className="text-red-400 group-hover:scale-110 transition-transform duration-300"
+          />
+          <span className="text-gray-200 group-hover:text-red-400 transition-colors duration-300">
+            Logout
+          </span>
         </button>
       </div>
     </div>

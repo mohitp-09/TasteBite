@@ -44,9 +44,8 @@ function CartItem({ name, price, quantity, size, onIncrement, onDecrement, onRem
 }
 
 // Main Cart Component
-// Main Cart Component
 export function Cart() {
-    let data = useCart(); // Assuming this hook provides your cart data
+    let data = useCart(); 
     let dispatch = useDispatchCart();
   
     // Initialize state with data
@@ -71,15 +70,18 @@ export function Cart() {
     };
   
     const handleRemove = (id) => {
+      dispatch({
+        type: 'REMOVE',
+        payload: id,
+      });
       setCartItems(items => items.filter(item => item.id !== id));
     };
   
     const handlePayNow = () => {
-      // Implement payment logic here
       alert('Proceeding to payment...');
     };
   
-    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0); // Use `qty` for calculations
+    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0); 
     const isFreeDelivery = subtotal >= FREE_DELIVERY_THRESHOLD;
     const total = subtotal + (isFreeDelivery ? 0 : DELIVERY_FEE);
   
@@ -101,7 +103,7 @@ export function Cart() {
                     key={item.id}
                     name={item.name}
                     price={item.price}
-                    quantity={item.qty} // Pass `qty` as `quantity` to the CartItem
+                    quantity={item.qty} 
                     size={item.size}
                     onIncrement={() => handleIncrement(item.id)}
                     onDecrement={() => handleDecrement(item.id)}
