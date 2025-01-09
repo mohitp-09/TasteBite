@@ -27,6 +27,7 @@ export function SignInForm({ onSignUp, onClose }) {
       console.log(json);
 
       if (json.success) {
+        localStorage.setItem("userEmail", credentials.email);
         localStorage.setItem("authToken", json.authToken);
 
         onClose();

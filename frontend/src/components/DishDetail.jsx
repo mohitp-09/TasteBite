@@ -5,27 +5,9 @@ import { ArrowLeft } from "lucide-react";
 import { Badge } from "./ui/Badge";
 import { DishMetrics } from "./ui/DishMatrics";
 import { useDispatchCart, useCart } from "./ContextReducer";
+import axios from "axios";
 
 export function DishDetail() {
-  let dispatch = useDispatchCart();
-
-  let data = useCart();
-
-  const handleAddToCart = async () => {
-    try {
-      await dispatch({
-        type: "ADD",
-        id: id,
-        name: foodName,
-        price: Number(foodOptions[0][selectedSize]), // Use price from the selected size
-        qty: quantity,
-        size: selectedSize,
-      });
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-    }
-  };
-  
 
   const location = useLocation();
   const {
@@ -35,9 +17,8 @@ export function DishDetail() {
     foodDescription,
     foodCategory,
     foodImage,
+    userEmail // Added userEmail
   } = location.state || {};
-
-  // console.log(location.state);
 
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState(
@@ -60,9 +41,31 @@ export function DishDetail() {
     return sizeLabels[size] || "";
   };
 
+  let dispatch = useDispatchCart();
+
+  let data = useCart();
+  console.log("added data",  data);
+
+  const handleAddToCart = async () => {
+    try {
+      const cartItem = {
+        userEmail, // Added userEmail
+        id,
+        name: foodName,
+        price: Number(foodOptions[0][selectedSize]),
+        qty: quantity,
+        size: selectedSize,
+      };
+      await dispatch({ type: "ADD", ...cartItem });
+      await axios.post("/order/cart/add", cartItem); // Added database interaction
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
+  };
+  
+
   return (
     <div className="min-h-screen bg-gray-900 text-white py-8 px-6 md:px-12">
-      {/* Back Button */}
       <button
         onClick={() => navigate("/")}
         className="group flex items-center gap-2 px-4 py-2 text-yellow-400 hover:text-yellow-500 transition-colors mb-6"
@@ -72,7 +75,6 @@ export function DishDetail() {
       </button>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-        {/* Left Column - Image */}
         <div className="relative rounded-2xl overflow-hidden shadow-lg">
           <Badge className="absolute top-4 left-4 bg-yellow-400 text-black">
             {foodCategory}
@@ -84,7 +86,6 @@ export function DishDetail() {
           />
         </div>
 
-        {/* Right Column - Details */}
         <div className="space-y-6">
           <div>
             <h1 className="text-4xl font-extrabold mb-2">{foodName}</h1>
@@ -92,8 +93,6 @@ export function DishDetail() {
           </div>
 
           <DishMetrics prepTime="25-30 mins" rating={4.8} servings="2-3" />
-
-          {/* Size Selection */}
 
           <div>
             <h3 className="text-xl font-semibold mb-4 text-white">
@@ -119,7 +118,6 @@ export function DishDetail() {
             </div>
           </div>
 
-          {/* Quantity Selection */}
           <div>
             <h3 className="text-xl font-semibold mb-4">Quantity:</h3>
             <div className="flex items-center gap-6">
@@ -140,7 +138,6 @@ export function DishDetail() {
             </div>
           </div>
 
-          {/* Total Price and Add to Cart */}
           <div className="flex items-center justify-between pt-6 border-t border-gray-700">
             <div>
               <p className="text-gray-400 mb-1">Total Price:</p>

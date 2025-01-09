@@ -24,7 +24,11 @@ const reducer = (state, action) => {
       // Use `id` to consistently remove the item from the cart
       // return state.filter((item) => item.id !== action.id);
       return state.filter((item) => item.id !== action.payload);
-
+    
+    case "DROP":
+      let empArray = []
+      return empArray
+      
     default:
       console.log("Error in Reducer");
       return state;

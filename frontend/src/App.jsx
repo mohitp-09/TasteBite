@@ -8,6 +8,8 @@ import { Home } from "./pages/Home";
 import { DishDetail } from "./components/DishDetail";
 import { CartProvider } from "./components/ContextReducer";
 import { Cart } from "./components/Cart";
+import Orders from "./components/myOrders/Orders";
+
 
 function App() {
   return (
@@ -19,6 +21,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/food" element={<DishDetail />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/orders" element={<Orders/>}/>
           </Routes>
           <Footer />
         </div>

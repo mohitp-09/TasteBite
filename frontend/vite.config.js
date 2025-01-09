@@ -7,6 +7,6 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   server: {
-    port: 5177, // Change 3000 to your desired port
+    port: 5177,
   },
 });
