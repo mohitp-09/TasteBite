@@ -1,79 +1,43 @@
-const Order = require("../models/orders.model.js");
+const Orders = require('../models/orders.model');
+const Cart = require('../models/cart.model');
 
-const addOrder = async (req, res) => {
-    try {
-        // Validate input
-        if (!req.body.email || !req.body.order_data) {
-            return res.status(400).json({ message: "Invalid input data" });
-        }
+// This will be triggered after the payment is successful (when redirected to success_url)
+const createOrder = async (req, res) => {
+  try {
+    const { email, paymentStatus } = req.body; // paymentStatus is passed from the payment success response
 
-        // Prepare order data
-        let data = [...req.body.order_data]; // Copy array to avoid mutation
-        data.splice(0, 0, { Order_date: req.body.order_date });
-
-        // Check if email exists
-        let eId = await Order.findOne({ email: req.body.email });
-
-        if (eId === null) {
-            await Order.create({
-                email: req.body.email,
-                order_data: [data]
-            });
-            res.json({ success: true });
-        } else {
-            await Order.findOneAndUpdate(
-                { email: req.body.email },
-                { $push: { order_data: data } }
-            );
-            res.json({ success: true });
-        }
-    } catch (error) {
-        console.error("Error:", error.message); 
-        res.status(500).json({ message: error.message }); 
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
     }
-};
 
-// const myOrderData = async (req,res)=>{
-//     try {
-//         let myData = await Order.findOne({'email': req.body.email})
-//         res.json({orderData: myData})
-//     } catch (error) {
-//         console.error("Error:", error.message); 
-//         res.status(500).json({ message: error.message }); 
-//     }
-// }
-
-const myOrderData = async (req, res) => {
-    try {
-        // Fetch order data from the database
-        let myData = await Order.findOne({ 'email': req.body.email });
-
-        if (!myData) {
-            return res.status(404).json({ message: "Order not found" });
-        }
-
-        // Extract relevant fields from the order_data array
-        const formattedOrders = myData.order_data.map(order =>
-            order.map(item => ({
-                name: item.name,
-                qty: item.qty,
-                size: item.size,
-                price: item.price,
-                totalPrice: item.totalPrice,
-                date: order[0].Order_date 
-            }))
-        );
-
-        res.json({ orderData: formattedOrders });
-    } catch (error) {
-        console.error("Error:", error.message);
-        res.status(500).json({ message: error.message });
+    // Get the cart data based on the email
+    const cartData = await Cart.findOne({ email });
+    if (!cartData) {
+      return res.status(404).json({ error: "Cart not found for this email" });
     }
+
+    // Create an order from the cart data
+    const newOrder = new Orders({
+      email: email,
+      order_data: cartData.order_data, // Use cart data as order data
+      payment_status: paymentStatus || 'pending', // Set payment status
+    });
+
+    // Save the new order
+    await newOrder.save();
+
+    // Only clear the cart if payment is successful
+    if (paymentStatus === 'paid') {
+      await Cart.deleteOne({ email }); // Clear cart if payment was successful
+    }
+
+    res.status(201).json({ message: "Order created successfully", order: newOrder });
+  } catch (error) {
+    console.error("Error creating order:", error.message);
+    res.status(500).json({ error: "Failed to create order" });
+  }
 };
-
-
 
 module.exports = {
-    addOrder,
-    myOrderData
+  createOrder
 };

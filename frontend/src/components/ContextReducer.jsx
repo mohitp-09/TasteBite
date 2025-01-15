@@ -1,12 +1,17 @@
 import React, { createContext, useContext, useReducer } from "react";
 
-const CartDispatchContext = createContext();
+// Contexts for Cart State and Dispatch
 const CartStateContext = createContext();
+const CartDispatchContext = createContext();
 
+// Reducer function to handle cart actions
 const reducer = (state, action) => {
   switch (action.type) {
+    case "INITIALIZE":
+      // Initialize cart state with data from the backend
+      return action.payload;
+
     case "ADD":
-      // Calculate totalPrice in the reducer to avoid issues with price duplication
       const totalPrice = action.price * action.qty;
       return [
         ...state,
@@ -16,25 +21,37 @@ const reducer = (state, action) => {
           price: action.price,
           qty: action.qty,
           size: action.size,
-          totalPrice,  // Store the calculated total price
+          totalPrice,
         },
       ];
 
+    case "UPDATE_QTY":
+      return state.map((item) =>
+        item.id === action.payload.id && item.size === action.payload.size
+          ? {
+              ...item,
+              qty: Math.max(1, item.qty + action.payload.qty), // Prevent quantity from dropping below 1
+              totalPrice: Math.max(1, item.qty + action.payload.qty) * item.price,
+            }
+          : item
+      );
+
     case "REMOVE":
-      // Use `id` to consistently remove the item from the cart
-      // return state.filter((item) => item.id !== action.id);
-      return state.filter((item) => item.id !== action.payload);
-    
+      return state.filter(
+        (item) => item.id !== action.payload.id || item.size !== action.payload.size
+      );
+
     case "DROP":
-      let empArray = []
-      return empArray
-      
+      // Clear the entire cart
+      return [];
+
     default:
-      console.log("Error in Reducer");
+      console.error("Unknown action type in reducer:", action.type);
       return state;
   }
 };
 
+// CartProvider to wrap components that need access to the cart state
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, []);
 
@@ -48,5 +65,18 @@ export const CartProvider = ({ children }) => {
 };
 
 // Custom hooks for accessing cart state and dispatch
-export const useCart = () => useContext(CartStateContext);
-export const useDispatchCart = () => useContext(CartDispatchContext);
+export const useCart = () => {
+  const context = useContext(CartStateContext);
+  if (context === undefined) {
+    throw new Error("useCart must be used within a CartProvider");
+  }
+  return context;
+};
+
+export const useDispatchCart = () => {
+  const context = useContext(CartDispatchContext);
+  if (context === undefined) {
+    throw new Error("useDispatchCart must be used within a CartProvider");
+  }
+  return context;
+};

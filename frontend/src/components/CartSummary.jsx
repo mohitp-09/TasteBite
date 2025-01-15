@@ -7,67 +7,44 @@ export function CartSummary({ subtotal, deliveryFee, total, isFreeDelivery }) {
   let data = useCart(); 
   let dispatch = useDispatchCart();
   console.log(data);
-
-  const handleCheckOut = async (data) => {
-    let userEmail = localStorage.getItem("userEmail");
-    try {
-      const response = await fetch("http://localhost:5000/order/addorder", {
-        method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          order_data: data,
-          email: userEmail,
-          order_date: new Date().toDateString(),
-        }),
-      });
-
-      console.log("Order Response:", response);
-
-      if (response.status === 200) {
-        dispatch({ type: "DROP" }); // Clear cart after successful order
-      }
-    } catch (error) {
-      console.error("Order submission failed:", error);
-    }
-  };
-
+  
   const makePayment = async () => {
     try {
-      const stripe = await loadStripe("pk_test_51QesqvKtmxu3CHbfqUlRi8CluSIQ7XLEQYcGT5RSmgopR9N8GCfERFgzRA69NZPLKWxAU8oYH7jDX5yK1jgFko7V00xgoQyKGq");
+      const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+  
+      const userEmail = localStorage.getItem("userEmail"); // Get user email
+      if (!userEmail) {
+        console.error("User email not found");
+        return;
+      }
+  
+      const body = { order_data: data, email: userEmail }; // Include email
+      const headers = { "Content-Type": "application/json" };
 
-      const body = {
-        order_data: data
-      };
-      const headers = {
-        "Content-Type": "application/json",
-      };
-
-      const response = await fetch("http://localhost:5000/order/payment", {
+  
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/order/payment`, {
         method: "POST",
         headers: headers,
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
-
+  
       const session = await response.json();
       console.log("Payment session created:", session);
-
+  
       const result = await stripe.redirectToCheckout({
         sessionId: session.id,
       });
-
+  
       if (result.error) {
         console.log(result.error.message);
       } else {
-        // Call handleCheckOut after successful payment
-        await handleCheckOut();
+        console.log("Redirecting to payment page...");
       }
     } catch (error) {
       console.error("Payment failed:", error);
     }
   };
-
+  
   return (
     <div className="bg-gray-800/50 rounded-lg p-4 backdrop-blur-sm border border-gray-700/30">
       <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
@@ -112,7 +89,7 @@ export function CartSummary({ subtotal, deliveryFee, total, isFreeDelivery }) {
         className="w-full mt-4 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-lg flex items-center justify-center gap-2 transition-all duration-200"
       >
         <CreditCard className="w-4 h-4" />
-        Pay Now
+        Place order
       </button>
     </div>
   );

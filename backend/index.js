@@ -25,6 +25,7 @@ app.use(express.json());
 const itemsRoute = require('./routes/items.router');
 const userRoute = require('./routes/user.router');
 const orderDataRoute = require('./routes/OrdersData.router');
+const cartRoute = require('./routes/cart.router')
 
 // Test Route
 app.get('/', (req, res) => {
@@ -35,6 +36,7 @@ app.get('/', (req, res) => {
 app.use("/api", itemsRoute); // Items routes
 app.use("/user", userRoute); // User routes
 app.use("/order", orderDataRoute); 
+app.use("/cart", cartRoute);
 
 
 

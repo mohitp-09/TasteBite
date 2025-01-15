@@ -5,10 +5,9 @@ import { ArrowLeft } from "lucide-react";
 import { Badge } from "./ui/Badge";
 import { DishMetrics } from "./ui/DishMatrics";
 import { useDispatchCart, useCart } from "./ContextReducer";
-import axios from "axios";
+import Swal from "sweetalert2";
 
 export function DishDetail() {
-
   const location = useLocation();
   const {
     id,
@@ -17,7 +16,6 @@ export function DishDetail() {
     foodDescription,
     foodCategory,
     foodImage,
-    userEmail // Added userEmail
   } = location.state || {};
 
   const [quantity, setQuantity] = useState(1);
@@ -44,25 +42,97 @@ export function DishDetail() {
   let dispatch = useDispatchCart();
 
   let data = useCart();
-  console.log("added data",  data);
+  console.log("added data", data);
 
   const handleAddToCart = async () => {
     try {
+      const userToken = localStorage.getItem("authToken"); // Check for token
+      const userEmail = localStorage.getItem("userEmail");
+
+      if (!userToken) {
+        // Show SweetAlert prompt if token is not found
+
+        Swal.fire({
+          icon: "error",
+          title: "Login Required",
+          toast: true,
+          position: "bottom", // Keeps the popup at the bottom
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          background: "rgba(255, 255, 255, 0.8)", // Transparent white
+          iconColor: "#FFD700",
+          customClass: {
+            popup: "glass-effect rounded-xl border-2 border-yellow-400 bottom-offset",
+            title: "text-gray-800 font-medium text-lg",
+          },
+        })
+        
+        
+        .then(() => {
+          // navigate("/login"); // Redirect to login page after user confirms
+        });
+        return; // Exit function since the user is not logged in
+      }
+
+      if (!userEmail) {
+        console.error("User email not found!");
+        return;
+      }
+
       const cartItem = {
-        userEmail, // Added userEmail
+        email: userEmail, // Add email here
         id,
         name: foodName,
         price: Number(foodOptions[0][selectedSize]),
         qty: quantity,
         size: selectedSize,
       };
+
+      // Update local cart state/context
       await dispatch({ type: "ADD", ...cartItem });
-      await axios.post("/order/cart/add", cartItem); // Added database interaction
+
+      // Send cart item to the backend
+      const response = await fetch("http://localhost:5000/cart/addcart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        }, // Send token in the headers
+        body: JSON.stringify(cartItem),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add to cart");
+      }
+
+      console.log("Item added to cart successfully:", await response.json());
+
+      Swal.fire({
+        icon: "success",
+        title: `${foodName} added to cart!`,
+        toast: true,
+        position: "bottom",
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        background: "#ffffff",
+        iconColor: "#FFD700",
+        customClass: {
+          popup: "rounded-xl border-2 border-yellow-400",
+          title: "text-gray-800 font-medium text-lg",
+        },
+      });
     } catch (error) {
-      console.error("Error adding to cart:", error);
+      console.error("Error adding to cart:", error.message);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Something went wrong while adding the item to your cart. Please try again.",
+        confirmButtonColor: "#fbbf24",
+      });
     }
   };
-  
 
   return (
     <div className="min-h-screen bg-gray-900 text-white py-8 px-6 md:px-12">
@@ -99,9 +169,9 @@ export function DishDetail() {
               Select Size
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {sizes.map(([size, price]) => (
+              {sizes.map(([size, price], index) => (
                 <button
-                  key={size}
+                  key={`${size}-${index}`}
                   onClick={() => setSelectedSize(size)}
                   className={`p-4 rounded-lg border-2 text-center transition-all ${
                     selectedSize === size

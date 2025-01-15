@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const {addOrder, myOrderData} = require('../controllers/orders.controller');
-const {makePayment} = require('../controllers/payment.controller');
+const {makePayment, handlePaymentSuccess } = require('../controllers/payment.controller');
+const {createOrder } = require('../controllers/orders.controller');
 
-router.post('/addorder', addOrder);
-router.post('/myorderdata', myOrderData);
-router.post('/payment',makePayment )
+router.post('/payment',makePayment );
+router.get('/success', handlePaymentSuccess);
+router.post('/create', createOrder); 
 
 
 module.exports = router;
