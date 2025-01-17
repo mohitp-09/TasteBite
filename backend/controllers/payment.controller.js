@@ -1,35 +1,41 @@
 require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const Cart = require('../models/cart.model');
-const Orders = require('../models/orders.model'); // Import the Orders model
+const Orders = require('../models/orders.model');
+const Cart = require('../models/cart.model'); 
 
 const makePayment = async (req, res) => {
   try {
     const { order_data, email } = req.body;
-
+    console.log('Received order data:', order_data);
     if (!order_data || !email) {
       return res.status(400).json({ error: "Invalid request data" });
     }
 
-    // Map cart data to Stripe line items
-    const lineItems = order_data.map((item) => ({
-      price_data: {
-        currency: "inr", // Currency
-        product_data: {
-          name: item.name, // Product name
+    // Validate that each order item has a valid price and quantity
+    const lineItems = order_data.map((item) => {
+      if (!item.name || !item.price || !item.qty) {
+        throw new Error("Missing required fields in order item");
+      }
+
+      return {
+        price_data: {
+          currency: "inr", // Currency
+          product_data: {
+            name: item.name, // Product name
+          },
+          unit_amount: Math.round(item.price * 100), // Convert price to cents
         },
-        unit_amount: Math.round(item.price * 100), // Convert price to cents
-      },
-      quantity: item.qty, // Quantity
-    }));
+        quantity: item.qty, // Quantity
+      };
+    });
 
     // Create Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"], // Payment method
+      payment_method_types: ['card'],
       line_items: lineItems,
-      mode: "payment", // Payment mode
-      success_url: `http://localhost:5177/order/success?session_id={CHECKOUT_SESSION_ID}&email=${email}`, // Success URL (with session ID)
-      cancel_url: "http://localhost:5177/cart", // Cancel URL
+      mode: 'payment',
+      success_url: `${process.env.FRONTEND_URL}/order/success?session_id={CHECKOUT_SESSION_ID}&email=${encodeURIComponent(email)}`,
+      cancel_url: `${process.env.FRONTEND_URL}/cart`,
     });
 
     // Send session ID to frontend for redirect
@@ -40,44 +46,76 @@ const makePayment = async (req, res) => {
   }
 };
 
-// Webhook to handle payment success
+
 const handlePaymentSuccess = async (req, res) => {
-  const { session_id, email } = req.query; // Get session_id and email from query string
-
-  if (!session_id || !email) {
-    return res.status(400).json({ error: "Invalid request: missing session ID or email" });
-  }
-
+  console.log('Payment success endpoint hit!');
   try {
-    // Retrieve the session to check payment status
+    const { session_id, email } = req.query; // Extract session ID and email from the query string
+
+    if (!session_id || !email) {
+      return res.status(400).json({ error: 'Invalid request parameters' });
+    }
+
+    // Verify Stripe session
     const session = await stripe.checkout.sessions.retrieve(session_id);
+    if (!session) {
+      console.error('Stripe session not found or invalid session ID');
+      return res.status(400).json({ error: 'Payment session not found' });
+    }
 
-    if (session.payment_status === "paid") {
-      // Parse order data from metadata (if stored during session creation)
-      const order_data = JSON.parse(session.metadata.order_data); // Optional: Adjust if needed
+    // Check if the payment was successful
+    if (session.payment_status !== 'paid') {
+      console.error('Payment status is not "paid"');
+      return res.status(400).json({ error: 'Payment not verified' });
+    }
 
-      // Save order to the database
+    // Fetch cart items for the user
+    const cartData = await Cart.findOne({ email });
+    if (!cartData) {
+      console.error('Cart not found for this email:', email);
+      return res.status(404).json({ error: 'Cart not found for this email' });
+    }
+
+    // Find the existing order for the user
+    let existingOrder = await Orders.findOne({ email });
+
+    if (existingOrder) {
+      // Append new order data to the existing order
+      existingOrder.order_data.push(...cartData.order_data);
+      existingOrder.payment_status = 'paid'; // Update payment status
+      await existingOrder.save();
+      console.log('Order updated:', existingOrder);
+    } else {
+      // Create a new order
       const newOrder = new Orders({
         email,
-        order_data,
+        order_data: cartData.order_data,
+        payment_status: 'paid',
       });
       await newOrder.save();
-
-      // Clear the user's cart
-      await Cart.deleteOne({ email });
-
-      res.status(200).json({ message: "Payment successful and order saved!" });
-    } else {
-      res.status(400).json({ error: "Payment failed" });
+      console.log('New order created:', newOrder);
     }
+
+    // Clear the cart after order processing
+    await Cart.deleteOne({ email });
+    console.log('Cart cleared for email:', email);
+
+    // Send success response
+    res.status(201).json({
+      message: 'Order created/updated successfully, and cart cleared.',
+    });
   } catch (error) {
-    console.error("Error handling payment success:", error.message);
-    res.status(500).json({ error: "Failed to process payment" });
+    console.error('Error handling payment success:', error.message);
+    res.status(500).json({ error: 'Failed to handle payment success' });
   }
 };
 
 
+
+
+
+
 module.exports = {
   makePayment,
-  handlePaymentSuccess,
+  handlePaymentSuccess 
 };

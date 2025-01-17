@@ -1,14 +1,48 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, ArrowLeft, Mail } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 
 export default function PaymentSuccessful() {
+  const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(false); // New state for loading
+  const [error, setError] = useState(null); // New state for errors
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const navigate = useNavigate(); // Initialize the useNavigate hook
+  const params = new URLSearchParams(location.search);
+  const sessionId = params.get('session_id');
+  const email = params.get('email');
+
+  useEffect(() => {
+    const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
+    setCart(savedCart);
+
+    if (sessionId && email) {
+      const verifyPayment = async () => {
+        try {
+          setLoading(true); // Set loading true
+          setError(null); // Reset any previous errors
+          const response = await axios.get(`http://localhost:5000/order/success?session_id=${sessionId}&email=${email}`);
+          console.log('Order processed successfully:', response.data);
+
+          // Clear cart on success
+          localStorage.removeItem('cart');
+          setCart([]);
+        } catch (error) {
+          console.error('Error processing payment:', error.response?.data || error.message);
+          setError('There was an issue processing your payment. Please try again later.');
+        } finally {
+          setLoading(false); // Set loading to false when done
+        }
+      };
+      verifyPayment();
+    }
+  }, [sessionId, email]);
 
   const handleClick = () => {
-    navigate('/'); // Navigate to the home route
+    navigate('/');
   };
 
   return (
@@ -27,12 +61,14 @@ export default function PaymentSuccessful() {
       className="absolute w-96 h-96 bg-slate-500/10 rounded-full blur-3xl"
     />
 
+    {/* Main Content */}
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="bg-slate-900/80 backdrop-blur-lg rounded-2xl shadow-xl p-8 max-w-md w-full border border-slate-800 relative z-10"
     >
+      {/* Animated CheckCircle */}
       <motion.div 
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
@@ -50,6 +86,7 @@ export default function PaymentSuccessful() {
         </motion.div>
       </motion.div>
 
+      {/* Order Confirmed */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -60,6 +97,7 @@ export default function PaymentSuccessful() {
         <p className="text-slate-400 mb-8">Your delicious food is being prepared.</p>
       </motion.div>
 
+      {/* Order Details */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -78,29 +116,24 @@ export default function PaymentSuccessful() {
           </div>
           
           <div className="space-y-2">
-            <motion.div 
-              whileHover={{ x: 5 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="flex justify-between items-center"
-            >
-              <div>
-                <p className="font-medium text-slate-200">Chicken Biryani</p>
-                <p className="text-sm text-slate-400">Quantity: 2</p>
-              </div>
-              <span className="font-semibold text-slate-200">₹399</span>
-            </motion.div>
-            
-            <motion.div 
-              whileHover={{ x: 5 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="flex justify-between items-center"
-            >
-              <div>
-                <p className="font-medium text-slate-200">Veg Fried Rice</p>
-                <p className="text-sm text-slate-400">Quantity: 1</p>
-              </div>
-              <span className="font-semibold text-slate-200">₹149</span>
-            </motion.div>
+            {cart.length > 0 ? (
+              cart.map((item, index) => (
+                <motion.div 
+                  whileHover={{ x: 5 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                  key={index}
+                  className="flex justify-between items-center"
+                >
+                  <div>
+                    <p className="font-medium text-slate-200">{item.name}</p>
+                    <p className="text-sm text-slate-400">Quantity: {item.quantity}</p>
+                  </div>
+                  <span className="font-semibold text-slate-200">₹{item.price}</span>
+                </motion.div>
+              ))
+            ) : (
+              <p className="text-slate-400">No items in the cart</p>
+            )}
           </div>
 
           <div className="border-t border-slate-700 pt-2 mt-2">
@@ -111,12 +144,13 @@ export default function PaymentSuccessful() {
                 transition={{ duration: 2, repeat: Infinity }}
                 className="font-bold text-lg text-yellow-400"
               >
-                ₹947
+                ₹{cart.reduce((acc, item) => acc + item.price * item.quantity, 0)}
               </motion.span>
             </div>
           </div>
         </motion.div>
 
+        {/* Buttons */}
         <motion.div
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -138,5 +172,5 @@ export default function PaymentSuccessful() {
       </motion.div>
     </motion.div>
   </div>
-  )
+  );
 }

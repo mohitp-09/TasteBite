@@ -1,41 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-export default function Orders() {
-  const [orders, setOrders] = useState([]); // State to hold orders
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
+const OrderHistory = () => {
+  const [orders, setOrders] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // Fetch orders from backend
     const fetchOrders = async () => {
       try {
-        const response = await fetch("http://localhost:5000/order/myorderdata", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email: localStorage.getItem("userEmail") }),
-        });
+        setLoading(true);
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch orders");
+        // Get the email from localStorage
+        const email = localStorage.getItem('userEmail'); // Ensure the email is stored in localStorage during login
+        console.log('Email from localStorage:', email); // Debugging line
+
+        if (!email) {
+          setError('No user is logged in.');
+          setLoading(false);
+          return;
         }
 
-        const data = await response.json();
-        console.log("Fetched data:", data); // Debug the fetched data
-
-        // Ensure orderData exists and is an array of arrays
-        if (Array.isArray(data.orderData)) {
-          setOrders(data.orderData);
-        } else {
-          console.error("Invalid orderData format:", data.orderData);
-          setOrders([]);
-        }
-
-        setLoading(false);
+        // Fetch orders for the logged-in user's email
+        const response = await axios.get('http://localhost:5000/order/history', { params: { email } });
+        console.log('API Response:', response.data); // Log the response to check the order data
+        setOrders(response.data.orders);
       } catch (err) {
-        console.error("Error fetching orders:", err.message);
-        setError(err.message);
+        console.error('Error fetching order history:', err);
+        setError(err.response?.data?.error || 'Failed to fetch order history');
+      } finally {
         setLoading(false);
       }
     };
@@ -43,99 +36,34 @@ export default function Orders() {
     fetchOrders();
   }, []);
 
-  if (loading)
-    return <div style={{ textAlign: "center", marginTop: "20px" }}>Loading...</div>;
-
-  if (error)
-    return (
-      <div style={{ textAlign: "center", color: "red", marginTop: "20px" }}>
-        Error: {error}
-      </div>
-    );
-
-  if (orders.length === 0) {
-    return (
-      <div style={{ textAlign: "center", marginTop: "20px" }}>
-        No orders found.
-      </div>
-    );
-  }
+  if (loading) return <p>Loading order history...</p>;
+  if (error) return <p className="error">{error}</p>;
 
   return (
-    <div style={{ maxWidth: "800px", margin: "20px auto", fontFamily: "Arial, sans-serif" }}>
-      <h1 style={{ textAlign: "center", color: "#fff" }}>Order History</h1>
-      {orders.map((orderGroup, index) => {
-        if (!Array.isArray(orderGroup)) {
-          console.error(`Invalid orderGroup at index ${index}:`, orderGroup);
-          return (
-            <div
-              key={index}
-              style={{
-                marginBottom: "20px",
-                padding: "20px",
-                borderRadius: "8px",
-                backgroundColor: "#1a1a1a",
-                color: "#fff",
-              }}
-            >
-              <h3 style={{ color: "red" }}>Invalid Order Group</h3>
-            </div>
-          );
-        }
-
-        const totalPrice = orderGroup
-          .reduce((sum, item) => {
-            const price = parseFloat(item.price) || 0;
-            const qty = parseInt(item.qty) || 0;
-            return sum + price * qty;
-          }, 0)
-          .toFixed(2);
-
-        return (
-          <div
-            key={index}
-            style={{
-              marginBottom: "20px",
-              padding: "20px",
-              borderRadius: "8px",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-              backgroundColor: "#1a1a1a",
-              color: "#fff",
-            }}
-          >
-            <h3 style={{ marginBottom: "15px", color: "#f1c40f" }}>
-              Order #{orderGroup[0]?.orderId || "N/A"}
-            </h3>
-            <p style={{ marginBottom: "10px", color: "#aaa" }}>
-              {orderGroup[0]?.date || "Date not available"}
-            </p>
-            {orderGroup.map((item, idx) => (
-              <div key={idx} style={{ marginBottom: "10px" }}>
-                <p>
-                  <span style={{ fontWeight: "bold" }}>{item.name || "Unnamed Item"}</span> x
-                  {item.qty || 0} ({item.size || "Unknown Size"})
-                </p>
-                <p style={{ color: "#aaa" }}>₹{parseFloat(item.price).toFixed(2) || "0.00"}</p>
-              </div>
-            ))}
-            <div
-              style={{
-                marginTop: "10px",
-                paddingTop: "10px",
-                borderTop: "1px solid #444",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <span style={{ fontWeight: "bold", fontSize: "16px", color: "#f1c40f" }}>Total:</span>
-              <span style={{ fontWeight: "bold", fontSize: "16px", color: "#f1c40f" }}>
-                ₹{totalPrice}
-              </span>
-            </div>
-          </div>
-        );
-      })}
+    <div>
+      <h1>Order History</h1>
+      {orders && orders.order_data.length > 0 ? (
+        <ul>
+          {orders.order_data.map((order, index) => (
+            <li key={index}>
+              <p><strong>Order #{index + 1}</strong></p>
+              <p>Items:</p>
+              <ul>
+                {order.items.map((item, idx) => (
+                  <li key={idx}>
+                    {item.name} - {item.quantity} @ ${item.price}
+                  </li>
+                ))}
+              </ul>
+              <p><strong>Status:</strong> {orders.payment_status}</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No orders found.</p>
+      )}
     </div>
   );
-}
+};
+
+export default OrderHistory;
