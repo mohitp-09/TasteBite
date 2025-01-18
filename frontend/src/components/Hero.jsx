@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 
 export function Hero({ onSearch }) {
   const [searchInput, setSearchInput] = useState('');
+  const [imageLoading, setImageLoading] = useState(true);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -18,10 +19,16 @@ export function Hero({ onSearch }) {
   return (
     <div className="relative h-[70vh]">
       <div className="absolute inset-0 bg-black/50 z-10" />
+      {imageLoading && (
+        <div className="absolute inset-0 bg-gray-800 animate-pulse" />
+      )}
       <img
         src="https://images.unsplash.com/photo-1504674900247-0877df9cc836"
         alt="Food background"
-        className="absolute inset-0 w-full h-full object-cover"
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+          imageLoading ? 'opacity-0' : 'opacity-100'
+        }`}
+        onLoad={() => setImageLoading(false)}
       />
       <div className="relative z-20 flex flex-col items-center justify-center h-full text-white text-center px-4">
         <h1 className="text-6xl font-bold mb-6">

@@ -103,7 +103,6 @@ export function Cart() {
     }
   };
   
-
   // Handle removing an item from the cart
   const handleRemove = async (id, size) => {
     try {
@@ -141,7 +140,11 @@ export function Cart() {
   const total = subtotal + (isFreeDelivery ? 0 : DELIVERY_FEE);
 
   if (loading) {
-    return <div className="text-center text-white">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-[#1a1f2e] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-yellow-400"></div>
+      </div>
+    );
   }
 
   return (

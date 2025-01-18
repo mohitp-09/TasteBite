@@ -1,5 +1,5 @@
-import React from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export function DishCard({
   id,
@@ -11,13 +11,23 @@ export function DishCard({
   foodCategory
 }) {
   const navigate = useNavigate();
+  const [imageLoading, setImageLoading] = useState(true);
+
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
       <div className="relative">
+        {imageLoading && (
+          <div className="absolute inset-0 bg-gray-700 animate-pulse">
+            <div className="w-full h-48" />
+          </div>
+        )}
         <img
           src={foodImage}
           alt={foodName}
-          className="w-full h-48 object-cover transition-transform duration-300 hover:scale-110"
+          className={`w-full h-48 object-cover transition-transform duration-300 hover:scale-110 ${
+            imageLoading ? 'opacity-0' : 'opacity-100'
+          }`}
+          onLoad={() => setImageLoading(false)}
         />
         <div className="absolute inset-0 bg-black opacity-0 hover:opacity-40 transition-opacity duration-300" />
       </div>
