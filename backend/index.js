@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const { mongoDB } = require('./db');  
-
+require('dotenv').config();
+const nodemailer = require('nodemailer');
 
 // Initialize Database
 mongoDB();
@@ -11,7 +12,8 @@ const app = express();
 // Middleware for CORS (Recommended)
 app.use(
   cors({
-    origin: "http://localhost:5177", // Allow only this origin
+    // origin: "http://localhost:5178", // Allow only this origin
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
     allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
   })

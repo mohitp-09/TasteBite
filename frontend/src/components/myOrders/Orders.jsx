@@ -23,7 +23,7 @@ const OrderHistory = () => {
 
         console.log('Fetching order history for email:', email);
 
-        const response = await axios.get(`http://localhost:5000/order/history?email=${email}`);
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/order/history?email=${email}`);
         console.log('API Response:', response.data);
 
         if (response.data?.orders?.order_data && response.data.orders.order_data.length > 0) {

@@ -66,7 +66,7 @@ export function Cart() {
 
     const fetchCart = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/cart/getcart/${userEmail}`);
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cart/getcart/${userEmail}`);
         const data = await response.json();
 
         if (response.ok) {
@@ -106,7 +106,7 @@ export function Cart() {
   // Handle removing an item from the cart
   const handleRemove = async (id, size) => {
     try {
-      const response = await fetch(`http://localhost:5000/cart/removeitem`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cart/removeitem`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

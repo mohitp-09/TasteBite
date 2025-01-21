@@ -12,7 +12,7 @@ export function SignUpForm({ onSignIn }) {
   const handlesubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5000/user/signup", {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

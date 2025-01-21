@@ -93,7 +93,7 @@ export function DishDetail() {
       await dispatch({ type: "ADD", ...cartItem });
 
       // Send cart item to the backend
-      const response = await fetch("http://localhost:5000/cart/addcart", {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cart/addcart`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
