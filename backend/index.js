@@ -33,6 +33,9 @@ app.get('/', (req, res) => {
 });
 
 // Use routes with prefixes
+app.use(cors({
+  origin: "https://taste-bite-pi.vercel.app",  // Restrict to frontend's domain
+}));
 app.use("/api", itemsRoute); // Items routes
 app.use("/user", userRoute); // User routes
 app.use("/order", orderDataRoute); 
