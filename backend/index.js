@@ -12,13 +12,11 @@ const app = express();
 // Middleware for CORS (Recommended)
 app.use(
   cors({
-    // origin: "http://localhost:5178", // Allow only this origin
-    origin: "https://taste-bite-pi.vercel.app",
-    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
-    allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
+    origin: 'https://taste-bite-pi.vercel.app', // Your frontend domain
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
+    allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Headers'],
   })
 );
-
 
 // Middleware for parsing JSON requests
 app.use(express.json());
