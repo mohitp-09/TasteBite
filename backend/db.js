@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
-const dbURl = "mongodb://127.0.0.1:27017/Tastebite";
+// const dbURl = "mongodb://127.0.0.1:27017/Tastebite";
 // const dbURl = "mongodb+srv://TasteBite:wAdR20R74D6Kp5Ir@cluster0.jfa6g.mongodb.net/TasteBite?retryWrites=true&w=majority";
 
+require('dotenv').config();
+
+const dbURl = process.env.DB_URL;
 
 // Connect to MongoDB
 const mongoDB = async () => {
