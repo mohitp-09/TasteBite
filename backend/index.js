@@ -13,7 +13,7 @@ const app = express();
 app.use(
   cors({
     // origin: "http://localhost:5178", // Allow only this origin
-    origin: "*",
+    origin: "https://taste-bite-pi.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
     allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
   })
