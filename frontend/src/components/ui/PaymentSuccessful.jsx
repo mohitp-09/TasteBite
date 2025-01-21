@@ -181,7 +181,7 @@ export default function PaymentSuccessful() {
           <motion.div
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
-            onClick={handleSendEmail}
+            //onClick={handleSendEmail}
             className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 cursor-pointer hover:bg-green-400 transition-colors"
           >
             <Mail className="w-5 h-5" />
@@ -191,7 +191,7 @@ export default function PaymentSuccessful() {
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
-            // onClick={handleClick}
+            onClick={handleClick}
             className="w-full border border-slate-700 text-slate-300 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-slate-800/50 transition-all hover:border-slate-600"
           >
             <ArrowLeft className="w-5 h-5" />
