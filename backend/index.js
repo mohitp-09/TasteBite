@@ -10,13 +10,19 @@ mongoDB();
 const app = express();
 
 // Middleware for CORS (Recommended)
-app.use(
-  cors({
-    origin: 'https://taste-bite-pi.vercel.app', // Your frontend domain
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
-    allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Headers'],
-  })
-);
+app.use(cors({
+  origin: "https://taste-bite-pi.vercel.app",  // Allow only this frontend
+  methods: ["GET", "POST", "PUT", "DELETE"],  // Allowed methods
+  allowedHeaders: ["Content-Type", "Authorization"],  // Allowed headers
+}));
+
+// Optionally, handle preflight requests for all routes
+app.options("*", cors({
+  origin: "https://taste-bite-pi.vercel.app",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
 
 // Middleware for parsing JSON requests
 app.use(express.json());
