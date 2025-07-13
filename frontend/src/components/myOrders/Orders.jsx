@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { History, ShoppingBag, DollarSign, Package, Calendar, Tag, Utensils, ClipboardX } from 'lucide-react';
+import { History, ShoppingBag, IndianRupee , Package, Calendar, Tag, Utensils, ClipboardX } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const OrderHistory = () => {
@@ -97,7 +97,7 @@ const OrderHistory = () => {
               <div className="bg-gradient-to-r from-gray-800/30 to-gray-800/20 p-6 rounded-lg backdrop-blur-sm border border-gray-700/30 hover:border-yellow-400/30 transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <h2 className="text-gray-400 font-medium">Total Amount</h2>
-                  <DollarSign className="w-5 h-5 text-yellow-400" />
+                  <IndianRupee className="w-5 h-5 text-yellow-400" />
                 </div>
                 <p className="text-2xl font-bold text-white mt-2">₹{stats.totalSpend}</p>
               </div>
@@ -105,7 +105,7 @@ const OrderHistory = () => {
               <div className="bg-gradient-to-r from-gray-800/30 to-gray-800/20 p-6 rounded-lg backdrop-blur-sm border border-gray-700/30 hover:border-yellow-400/30 transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <h2 className="text-gray-400 font-medium">Average Bill</h2>
-                  <DollarSign className="w-5 h-5 text-yellow-400" />
+                  <IndianRupee className="w-5 h-5 text-yellow-400" />
                 </div>
                 <p className="text-2xl font-bold text-white mt-2">₹{stats.avgSpend}</p>
               </div>
